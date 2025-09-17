@@ -2,8 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { placeAtom } from "../app/atom.ts";
-import { loadingCityAtom } from "../app/atom.ts";
+import { placeAtom } from "../app/atom";
+import { loadingCityAtom } from "../app/atom";
 import axios from "axios";
 import { format, parseISO, fromUnixTime } from "date-fns";
 import { convertKelvinToCelsius } from "@/utils/convertKelvinToCelsius";

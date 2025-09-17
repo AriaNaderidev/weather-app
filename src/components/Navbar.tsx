@@ -7,8 +7,8 @@ import SearchBox from "./SearchBox";
 import { useState } from "react";
 import axios from "axios";
 import { useAtom } from "jotai";
-import { placeAtom } from "../app/atom.ts";
-import { loadingCityAtom } from "../app/atom.ts";
+import { placeAtom } from "../app/atom";
+import { loadingCityAtom } from "../app/atom";
 
 type Props = { location?: string };
 
