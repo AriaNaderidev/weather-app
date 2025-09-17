@@ -24,6 +24,10 @@ export default function Navbar({ location }: Props) {
   const [suggestion, setSuggestion] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  type CitySuggestion = {
+    name: string;
+  };
+
   const handleInputChange = async (value: string) => {
     setCity(value);
     if (value.length >= 3) {
@@ -32,7 +36,9 @@ export default function Navbar({ location }: Props) {
           `https://api.openweathermap.org/data/2.5/find?q=${value}&appid=${API_KEY}`
         );
 
-        const suggestions = res.data.list.map((item: any) => item.name);
+        const suggestions = res.data.list.map(
+          (item: CitySuggestion) => item.name
+        );
 
         setSuggestion(suggestions);
         setShowSuggestions(true);
