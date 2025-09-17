@@ -36,6 +36,8 @@ export default function Home() {
 
   const firstData = data?.list[0];
 
+  console.log(firstData);
+
   if (isPending)
     return (
       <div className=" min-h-screen flex items-center justify-center">
@@ -43,16 +45,21 @@ export default function Home() {
       </div>
     );
 
+  interface ForecastEntry {
+    dt: number;
+  }
+
   const uniqueDates = [
     ...new Set(
       data?.list.map(
-        (entry) => new Date(entry.dt * 1000).toISOString().split("T")[0]
+        (entry: ForecastEntry) =>
+          new Date(entry.dt * 1000).toISOString().split("T")[0]
       )
     ),
   ];
 
   const firstDataForEachDate = uniqueDates.map((date) => {
-    return data?.list.find((entry) => {
+    return data?.list.find((entry: ForecastEntry) => {
       const entryDate = new Date(entry.dt * 1000).toISOString().split("T")[0];
       const entryTime = new Date(entry.dt * 1000).getHours();
       return entryDate === date && entryTime >= 6;
@@ -144,16 +151,16 @@ export default function Home() {
               {firstDataForEachDate.map((d, i) => (
                 <ForecastWeatherDetail
                   key={i}
-                  description={d?.weather[0].description ?? ""}
+                  description={d?.weather[0].description ?? "-"}
                   weatehrIcon={d?.weather[0].icon ?? "01d"}
-                  date={d ? format(parseISO(d.dt_txt), "dd.MM") : ""}
-                  day={d ? format(parseISO(d.dt_txt), "EEEE") : "dd.MM"}
-                  feels_like={d?.main.feels_like ?? 0}
-                  temp={d?.main.temp ?? 0}
+                  date={d ? format(parseISO(d.dt_txt), "dd.MM") : "--:--"}
+                  day={d ? format(parseISO(d.dt_txt), "EEEE") : "Tuesday"}
+                  feels_like={d?.main.feels_like ?? 286.28}
+                  temp={d?.main.temp ?? 286.28}
                   temp_max={d?.main.temp_max ?? 0}
                   temp_min={d?.main.temp_min ?? 0}
-                  airPressure={`${d?.main.pressure} hPa `}
-                  humidity={`${d?.main.humidity}% `}
+                  airPressure={`${d?.main.pressure ?? 1025} hPa `}
+                  humidity={`${d?.main.humidity ?? 77}% `}
                   sunrise={format(
                     fromUnixTime(data?.city.sunrise ?? 1702517657),
                     "H:mm"
