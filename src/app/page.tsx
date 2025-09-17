@@ -1,103 +1,244 @@
-import Image from "next/image";
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { placeAtom } from "../app/atom.ts";
+import { loadingCityAtom } from "../app/atom.ts";
+import axios from "axios";
+import { format, parseISO, fromUnixTime } from "date-fns";
+import { convertKelvinToCelsius } from "@/utils/convertKelvinToCelsius";
+import { metersToKilometers } from "@/utils/metersToKilometers";
+import { convertWindSpeed } from "@/utils/convertWindSpeed";
+
+import Navbar from "@/components/Navbar";
+import Container from "@/components/Container";
+import WeatherIcon from "@/components/WeatherIcon";
+import WeatherDetails from "@/components/WeatherDetails";
+import ForecastWeatherDetail from "@/components/ForecastWeatherDetail";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [place, setPlace] = useAtom(placeAtom);
+  const [loadingCity, _] = useAtom(loadingCityAtom);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const { isPending, error, data, refetch } = useQuery({
+    queryKey: ["repoData"],
+    queryFn: async () => {
+      const { data } = await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${place}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`
+      );
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [place, refetch]);
+
+  const firstData = data?.list[0];
+
+  if (isPending)
+    return (
+      <div className=" min-h-screen flex items-center justify-center">
+        <p className="animate-bounce">Loading...</p>
+      </div>
+    );
+
+  const uniqueDates = [
+    ...new Set(
+      data?.list.map(
+        (entry) => new Date(entry.dt * 1000).toISOString().split("T")[0]
+      )
+    ),
+  ];
+
+  const firstDataForEachDate = uniqueDates.map((date) => {
+    return data?.list.find((entry) => {
+      const entryDate = new Date(entry.dt * 1000).toISOString().split("T")[0];
+      const entryTime = new Date(entry.dt * 1000).getHours();
+      return entryDate === date && entryTime >= 6;
+    });
+  });
+
+  return (
+    <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
+      <Navbar location={data?.city.name} />
+      {loadingCity ? (
+        <WeatherSkeleton />
+      ) : (
+        <>
+          <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4">
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <h2 className="flex gap-1 text-2xl items-center ">
+                  <p>{format(parseISO(firstData?.dt_txt ?? ""), "EEEE")}</p>
+                  <p className="text-lg">
+                    ({format(parseISO(firstData?.dt_txt ?? ""), "dd.MM.yy")})
+                  </p>
+                </h2>
+                <Container className="gap-10 px-6 items-center">
+                  <div className="flex flex-col px-4">
+                    <span className="text-5xl">
+                      {convertKelvinToCelsius(firstData?.main.temp ?? 304.84)}°
+                    </span>
+                    <p className="text-xs space-x-1 whitespace-nowrap">
+                      <span>Feels like</span>
+                      <span>
+                        {convertKelvinToCelsius(
+                          firstData?.main.feels_like ?? 0
+                        )}
+                        °
+                      </span>
+                    </p>
+                    <p className="text-xs space-x-2">
+                      <span>
+                        {convertKelvinToCelsius(firstData?.main.temp_min) ?? 0}
+                        °↓{" "}
+                      </span>
+                      <span>
+                        {convertKelvinToCelsius(firstData?.main.temp_max) ?? 0}
+                        °↑{" "}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex gap-10 sm:gap-16 overflow-x-auto w-full justify-between pr-3">
+                    {data?.list.map((item, index) => (
+                      <div
+                        key={index}
+                        className="  flex flex-col justify-between items-center gap-2 text-xs font-semibold"
+                      >
+                        <p className="whitespace-nowrap">
+                          {format(parseISO(item.dt_txt), "h:mm a")}
+                        </p>
+
+                        <WeatherIcon icon={item.weather[0].icon} />
+                        <p>{convertKelvinToCelsius(item?.main.temp) ?? 0}°</p>
+                      </div>
+                    ))}
+                  </div>
+                </Container>
+              </div>
+              <div className="gap-4 flex">
+                <Container className="w-fit flex-col items-center justify-center px-4">
+                  <p className="capitalize text-center">
+                    {firstData?.weather[0].description}
+                  </p>
+                  <WeatherIcon icon={firstData?.weather[0].icon} />
+                </Container>
+                <Container className="bg-yellow-300/80 px-6 gap-4 justify-between overflow-x-auto">
+                  <WeatherDetails
+                    vsibility={metersToKilometers(
+                      firstData?.visibility ?? 10000
+                    )}
+                    airPressure={`${firstData?.main.pressure} hPa`}
+                    windSpeed={convertWindSpeed(firstData?.wind.speed ?? 1.64)}
+                    humidity={`${firstData?.main.humidity}%`}
+                    sunrise={format(fromUnixTime(data?.city.sunrise), "H:mm")}
+                    sunset={format(fromUnixTime(data?.city.sunset), "H:mm")}
+                  />
+                </Container>
+              </div>
+            </section>
+
+            <section className="flex w-full flex-col gap-4">
+              <p className="text-2xl">Forecast (7 days)</p>
+              {firstDataForEachDate.map((d, i) => (
+                <ForecastWeatherDetail
+                  key={i}
+                  description={d?.weather[0].description ?? ""}
+                  weatehrIcon={d?.weather[0].icon ?? "01d"}
+                  date={d ? format(parseISO(d.dt_txt), "dd.MM") : ""}
+                  day={d ? format(parseISO(d.dt_txt), "EEEE") : "dd.MM"}
+                  feels_like={d?.main.feels_like ?? 0}
+                  temp={d?.main.temp ?? 0}
+                  temp_max={d?.main.temp_max ?? 0}
+                  temp_min={d?.main.temp_min ?? 0}
+                  airPressure={`${d?.main.pressure} hPa `}
+                  humidity={`${d?.main.humidity}% `}
+                  sunrise={format(
+                    fromUnixTime(data?.city.sunrise ?? 1702517657),
+                    "H:mm"
+                  )}
+                  sunset={format(
+                    fromUnixTime(data?.city.sunset ?? 1702517657),
+                    "H:mm"
+                  )}
+                  visability={`${metersToKilometers(d?.visibility ?? 10000)} `}
+                  windSpeed={`${convertWindSpeed(d?.wind.speed ?? 1.64)} `}
+                />
+              ))}
+            </section>
+          </main>
+        </>
+      )}
     </div>
   );
 }
+
+const WeatherSkeleton = () => {
+  return (
+    <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4 animate-pulse">
+      <section className="space-y-4">
+        <div className="space-y-2">
+          {/* Header date */}
+          <h2 className="flex gap-2 text-2xl items-center">
+            <div className="h-6 w-24 bg-gray-200 rounded"></div>
+            <div className="h-5 w-16 bg-gray-200 rounded"></div>
+          </h2>
+
+          <div className="flex gap-10 px-6 items-center">
+            <div className="flex flex-col px-4 gap-2">
+              <div className="h-10 w-20 bg-gray-200 rounded"></div>
+              <div className="h-4 w-28 bg-gray-200 rounded"></div>
+              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+            </div>
+
+            {/* Hourly forecast */}
+            <div className="flex gap-6 overflow-x-auto w-full pr-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col justify-between items-center gap-2 text-xs font-semibold"
+                >
+                  <div className="h-3 w-12 bg-gray-200 rounded"></div>
+                  <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                  <div className="h-3 w-8 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="gap-4 flex">
+          <div className="w-fit flex-col items-center justify-center px-4 flex gap-2">
+            <div className="h-4 w-20 bg-gray-200 rounded"></div>
+            <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+          </div>
+
+          <div className="flex-1 bg-gray-100 px-6 gap-4 flex justify-between overflow-x-auto">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex flex-col gap-2 items-center">
+                <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                <div className="h-4 w-12 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="flex w-full flex-col gap-4">
+        <div className="h-6 w-40 bg-gray-200 rounded"></div>
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between p-4 border border-gray-300 rounded bg-gray-50"
+          >
+            <div className="h-6 w-20 bg-gray-200 rounded"></div>
+            <div className="h-6 w-12 bg-gray-200 rounded"></div>
+            <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+            <div className="h-6 w-16 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+      </section>
+    </main>
+  );
+};
