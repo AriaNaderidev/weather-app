@@ -88,6 +88,37 @@ export default function Home() {
     );
   });
 
+  type ForecastItem = {
+    dt: number;
+    dt_txt: string;
+    main: {
+      temp: number;
+      feels_like: number;
+      temp_min: number;
+      temp_max: number;
+      pressure: number;
+      humidity: number;
+    };
+    weather: {
+      id: number;
+      main: string;
+      description: string;
+      icon: string;
+    }[];
+    wind: {
+      speed: number;
+      deg: number;
+      gust?: number;
+    };
+    visibility: number;
+    clouds: {
+      all: number;
+    };
+    pop?: number; // probability of precipitation
+    rain?: { [key: string]: number }; // like "3h": value
+    snow?: { [key: string]: number };
+  };
+
   return (
     <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
       <Navbar location={data?.city?.name ?? "-"} />
@@ -184,7 +215,7 @@ export default function Home() {
           {/* Forecast for 7 days */}
           <section className="flex w-full flex-col gap-4">
             <p className="text-2xl">Forecast (7 days)</p>
-            {firstDataForEachDate.map((d, i) => (
+            {firstDataForEachDate.map((d: ForecastItem, i: number) => (
               <ForecastWeatherDetail
                 key={i}
                 description={d?.weather[0]?.description ?? "-"}
