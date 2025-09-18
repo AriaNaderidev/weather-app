@@ -160,7 +160,7 @@ const SuggestionsBox = ({
 }: {
   showSuggestions: boolean;
   suggestion: string[];
-  handleSuggestionsClick: (value: string) => void;
+  handleSuggestionClick: (value: string) => void;
   error: string;
 }) => {
   return (
