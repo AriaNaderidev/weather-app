@@ -77,47 +77,18 @@ export default function Home() {
   ];
 
   // First entry for each date after 6am
-  const firstDataForEachDate = uniqueDates.map((date) => {
-    const filtered = data?.list.filter(
-      (entry) => new Date(entry.dt * 1000).toISOString().split("T")[0] === date
-    );
-    // Try to get the first entry after 6 AM, else take the first of the day
-    return (
-      filtered?.find((entry) => new Date(entry.dt * 1000).getHours() >= 6) ||
-      filtered?.[0]
-    );
-  });
-
-  type ForecastItem = {
-    dt: number;
-    dt_txt: string;
-    main: {
-      temp: number;
-      feels_like: number;
-      temp_min: number;
-      temp_max: number;
-      pressure: number;
-      humidity: number;
-    };
-    weather: {
-      id: number;
-      main: string;
-      description: string;
-      icon: string;
-    }[];
-    wind: {
-      speed: number;
-      deg: number;
-      gust?: number;
-    };
-    visibility: number;
-    clouds: {
-      all: number;
-    };
-    pop?: number; // probability of precipitation
-    rain?: { [key: string]: number }; // like "3h": value
-    snow?: { [key: string]: number };
-  };
+  const firstDataForEachDate: WeatherItem[] = uniqueDates
+    .map((date) => {
+      const filtered = data?.list.filter(
+        (entry) =>
+          new Date(entry.dt * 1000).toISOString().split("T")[0] === date
+      );
+      return (
+        filtered?.find((entry) => new Date(entry.dt * 1000).getHours() >= 6) ||
+        filtered?.[0]
+      );
+    })
+    .filter((item): item is WeatherItem => item !== undefined);
 
   return (
     <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
@@ -215,7 +186,7 @@ export default function Home() {
           {/* Forecast for 7 days */}
           <section className="flex w-full flex-col gap-4">
             <p className="text-2xl">Forecast (7 days)</p>
-            {firstDataForEachDate.map((d: ForecastItem, i: number) => (
+            {firstDataForEachDate.map((d, i) => (
               <ForecastWeatherDetail
                 key={i}
                 description={d?.weather[0]?.description ?? "-"}
