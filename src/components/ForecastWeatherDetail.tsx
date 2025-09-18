@@ -6,6 +6,8 @@ import WeatherDetails from "@/components/WeatherDetails";
 
 import { convertKelvinToCelsius } from "@/utils/convertKelvinToCelsius";
 
+import { WeatherDetailProps } from "@/components/WeatherDetails";
+
 export interface ForecastWeatherDetailProps extends WeatherDetailProps {
   weatherIcon: string;
   date: string;
@@ -14,7 +16,6 @@ export interface ForecastWeatherDetailProps extends WeatherDetailProps {
   feels_like: number;
   temp_min: number;
   temp_max: number;
-  airPressure: string;
   description: string;
 }
 
