@@ -60,11 +60,7 @@ export default function Home() {
   const firstData = data?.list[0] ?? null;
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="animate-bounce">Loading...</p>
-      </div>
-    );
+    return <WeatherSkeleton />;
   }
 
   // Unique dates for forecast
@@ -219,16 +215,21 @@ const WeatherSkeleton = () => (
   <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4 animate-pulse">
     <section className="space-y-4">
       <div className="space-y-2">
+        {/* Header date */}
         <h2 className="flex gap-2 text-2xl items-center">
           <div className="h-6 w-24 bg-gray-200 rounded"></div>
           <div className="h-5 w-16 bg-gray-200 rounded"></div>
         </h2>
+
+        {/* Current temp block */}
         <div className="flex gap-10 px-6 items-center">
           <div className="flex flex-col px-4 gap-2">
             <div className="h-10 w-20 bg-gray-200 rounded"></div>
             <div className="h-4 w-28 bg-gray-200 rounded"></div>
             <div className="h-4 w-24 bg-gray-200 rounded"></div>
           </div>
+
+          {/* Hourly forecast */}
           <div className="flex gap-6 overflow-x-auto w-full pr-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
@@ -243,6 +244,39 @@ const WeatherSkeleton = () => (
           </div>
         </div>
       </div>
+
+      {/* Weather description + details */}
+      <div className="gap-4 flex">
+        <div className="w-fit flex-col items-center justify-center px-4 flex gap-2">
+          <div className="h-4 w-20 bg-gray-200 rounded"></div>
+          <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+        </div>
+
+        <div className="flex-1 bg-gray-100 px-6 gap-4 flex justify-between overflow-x-auto">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-2 items-center">
+              <div className="h-4 w-16 bg-gray-200 rounded"></div>
+              <div className="h-4 w-12 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* Forecast (7 days) */}
+    <section className="flex w-full flex-col gap-4">
+      <div className="h-6 w-40 bg-gray-200 rounded"></div>
+      {Array.from({ length: 7 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center justify-between p-4 border border-gray-300 rounded bg-gray-50"
+        >
+          <div className="h-6 w-20 bg-gray-200 rounded"></div>
+          <div className="h-6 w-12 bg-gray-200 rounded"></div>
+          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+          <div className="h-6 w-16 bg-gray-200 rounded"></div>
+        </div>
+      ))}
     </section>
   </main>
 );
