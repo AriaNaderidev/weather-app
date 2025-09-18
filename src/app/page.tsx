@@ -169,7 +169,9 @@ export default function Home() {
 
               <Container className="bg-yellow-300/80 px-6 gap-4 justify-between overflow-x-auto">
                 <WeatherDetails
-                  vsibility={metersToKilometers(firstData?.visibility ?? 10000)}
+                  visibility={metersToKilometers(
+                    firstData?.visibility ?? 10000
+                  )}
                   airPressure={`${firstData?.main.pressure ?? 1025} hPa`}
                   windSpeed={convertWindSpeed(firstData?.wind?.speed ?? 0)}
                   humidity={`${firstData?.main.humidity ?? 0}%`}
