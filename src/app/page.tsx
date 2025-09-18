@@ -42,7 +42,7 @@ export default function Home() {
   const [place] = useAtom(placeAtom);
   const [loadingCity] = useAtom(loadingCityAtom);
 
-  const { isLoading, error, data, refetch } = useQuery<WeatherResponse>({
+  const { isLoading, data, refetch } = useQuery<WeatherResponse>({
     queryKey: ["weatherData", place],
     queryFn: async () => {
       const { data } = await axios.get(
