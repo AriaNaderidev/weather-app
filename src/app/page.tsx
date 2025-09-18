@@ -199,7 +199,7 @@ export default function Home() {
                 humidity={`${d?.main?.humidity ?? 0}%`}
                 sunrise={format(fromUnixTime(data?.city?.sunrise ?? 0), "H:mm")}
                 sunset={format(fromUnixTime(data?.city?.sunset ?? 0), "H:mm")}
-                visability={`${metersToKilometers(d?.visibility ?? 10000)}`}
+                visibility={`${metersToKilometers(d?.visibility ?? 10000)}`}
                 windSpeed={`${convertWindSpeed(d?.wind?.speed ?? 0)}`}
               />
             ))}

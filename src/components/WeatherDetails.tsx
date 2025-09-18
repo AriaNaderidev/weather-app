@@ -15,7 +15,7 @@ export interface WeatherDetailProps {
 
 export default function WeatherDetails(props: WeatherDetailProps) {
   const {
-    vsibility = "25km",
+    visibility = "25km",
     humidity = "61%",
     windSpeed = "7 km/h",
     airPressure = "1012 hPa",
@@ -27,8 +27,8 @@ export default function WeatherDetails(props: WeatherDetailProps) {
     <>
       <SingleWeatherDetail
         icon={<LuEye />}
-        information="Visability"
-        value={vsibility}
+        information="Visibility"
+        value={visibility}
       />
       <SingleWeatherDetail
         icon={<FiDroplet />}
